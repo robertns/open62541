@@ -15,17 +15,17 @@ class testing:
     def __init__(self):
         self.ns = NodeSet("testing")
 
-        logger.debug("Phase 1: Reading XML file nodessets")
+        logger.warn("Phase 1: Reading XML file nodessets")
         self.ns.parseXML("Opc.Ua.NodeSet2.xml")
         # self.ns.parseXML("Opc.Ua.NodeSet2.Part4.xml")
         # self.ns.parseXML("Opc.Ua.NodeSet2.Part5.xml")
         # self.ns.parseXML("Opc.Ua.SimulationNodeSet2.xml")
 
-        logger.debug("Phase 2: Linking address space references and datatypes")
+        logger.warn("Phase 2: Linking address space references and datatypes")
         self.ns.linkOpenPointers()
         self.ns.sanitize()
 
-        logger.debug("Phase 3: Allocating variable value data")
+        logger.warn("Phase 3: Allocating variable value data")
         self.ns.allocateVariables()
 
         bin = self.ns.buildBinary()
@@ -58,17 +58,17 @@ class testing_open62541_header:
     def __init__(self):
         self.ns = opcua_ns("testing")
 
-        logger.debug("Phase 1: Reading XML file nodessets")
+        logger.warn("Phase 1: Reading XML file nodessets")
         self.ns.parseXML("Opc.Ua.NodeSet2.xml")
         # self.ns.parseXML("Opc.Ua.NodeSet2.Part4.xml")
         # self.ns.parseXML("Opc.Ua.NodeSet2.Part5.xml")
         # self.ns.parseXML("Opc.Ua.SimulationNodeSet2.xml")
 
-        logger.debug("Phase 2: Linking address space references and datatypes")
+        logger.warn("Phase 2: Linking address space references and datatypes")
         self.ns.linkOpenPointers()
         self.ns.sanitize()
 
-        logger.debug("Phase 3: Calling C Printers")
+        logger.warn("Phase 3: Calling C Printers")
         code = self.ns.printOpen62541Header()
 
         codeout = codecs.open("./open62541_nodeset.c", "w+", encoding='utf-8')

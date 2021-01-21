@@ -102,6 +102,7 @@ class NodeId:
 class ExtensionObject:
     def __init__(self, val):
         self.val = val
+        logger.warn("create extension object: " + str(val['content']['encoded']['typeId']))
 
     def to_string(self):
         encoding = self.val['encoding']

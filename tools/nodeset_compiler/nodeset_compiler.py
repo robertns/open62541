@@ -85,7 +85,7 @@ args = parser.parse_args()
 logging.basicConfig(stream=sys.stdout)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-verbosity = 0
+verbosity = 4
 if args.verbose:
     verbosity = int(args.verbose)
 if (verbosity == 1):
@@ -98,6 +98,8 @@ elif (verbosity >= 4):
     logging.basicConfig(level=logging.DEBUG)
 else:
     logging.basicConfig(level=logging.CRITICAL)
+
+logging.basicConfig(level=logging.DEBUG)
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -116,18 +118,18 @@ def getTypesArray(nsIdx):
 
 for xmlfile in args.existing:
     if xmlfile.name in loadedFiles:
-        logger.info("Skipping Nodeset since it is already loaded: {} ".format(xmlfile.name))
+        logger.warn("Skipping Nodeset since it is already loaded: {} ".format(xmlfile.name))
         continue
     loadedFiles.append(xmlfile.name)
-    logger.info("Preprocessing (existing) " + str(xmlfile.name))
+    logger.warn("Preprocessing (existing) " + str(xmlfile.name))
     ns.addNodeSet(xmlfile, True, typesArray=getTypesArray(nsCount))
     nsCount +=1
 for xmlfile in args.infiles:
     if xmlfile.name in loadedFiles:
-        logger.info("Skipping Nodeset since it is already loaded: {} ".format(xmlfile.name))
+        logger.warn("Skipping Nodeset since it is already loaded: {} ".format(xmlfile.name))
         continue
     loadedFiles.append(xmlfile.name)
-    logger.info("Preprocessing " + str(xmlfile.name))
+    logger.warn("Preprocessing " + str(xmlfile.name))
     ns.addNodeSet(xmlfile, typesArray=getTypesArray(nsCount))
     nsCount +=1
 
@@ -146,7 +148,7 @@ for ignoreFile in args.ignoreFiles:
         id = line.replace("\n", "")
         ns.hide_node(NodeId(id))
         #if not ns.hide_node(NodeId(id)):
-        #    logger.info("Can't ignore node, namespace does currently not contain a node with id " + str(id))
+        #    logger.warn("Can't ignore node, namespace does currently not contain a node with id " + str(id))
     ignoreFile.close()
 
 # Remove nodes that are not printable or contain parsing errors, such as
@@ -173,7 +175,7 @@ if args.blacklistFiles:
                 continue
             n = ns.getNodeByIDString(id)
             if n is None:
-                logger.debug("Can't blacklist node, namespace does currently not contain a node with id " + str(id))
+                logger.warn("Can't blacklist node, namespace does currently not contain a node with id " + str(id))
             else:
                 ns.remove_node(n)
         blacklist.close()
@@ -181,7 +183,12 @@ if args.blacklistFiles:
 
 ns.setNodeParent()
 
-logger.info("Generating Code for Backend: {}".format(args.backend))
+logger.warn("FEM: Test log")
+logger.warn("does not work ...")
+
+
+
+logger.warn("Generating Code for Backend: {}".format(args.backend))
 
 if args.backend == "open62541":
     # Create the C code with the open62541 backend of the compiler
@@ -195,4 +202,4 @@ else:
     exit(1)
 
 
-logger.info("NodeSet generation code successfully printed")
+logger.warn("NodeSet generation code successfully printed")

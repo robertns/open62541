@@ -122,7 +122,7 @@ class Value(object):
         elif stringName == 'xmlelement':
             t = XmlElement()
         else:
-            logger.debug("No class representing stringName " + stringName + " was found. Cannot create builtinType.")
+            logger.warn("No class representing stringName " + stringName + " was found. Cannot create builtinType.")
             return None
         t.encodingRule = encodingRule
         return t
@@ -252,6 +252,7 @@ class Value(object):
             # create an extension object to hold multipart type
 
             extobj = ExtensionObject()
+            logger.warn("FEM: Create ExtensionObject")
             if not xmlvalue.localName == "ExtensionObject":
                 logger.error(str(parent.id) + ": Expected XML tag <ExtensionObject> for multipart type, but found " + xmlvalue.localName + " instead.")
                 return extobj
@@ -268,6 +269,8 @@ class Value(object):
 
             etype = NodeId(etype[0].firstChild.data.strip(' \t\n\r'))
             extobj.typeId = etype
+
+            logger.warn("FEM: Create ExtensionObject(): extobj.typeId = " + str(extobj.typeId))
 
             ebody = xmlvalue.getElementsByTagName("Body")
             if len(ebody) == 0:
@@ -490,6 +493,7 @@ class ExtensionObject(Value):
     def __init__(self, xmlelement=None):
         Value.__init__(self)
         if xmlelement:
+            logger.warn("create extension object: xmlelement = " + str(xmlelement))
             self.parseXML(xmlelement)
 
     def parseXML(self, xmlelement):
@@ -648,7 +652,7 @@ class ExpandedNodeId(Value):
 
     def parseXML(self, xmlvalue):
         self.checkXML(xmlvalue)
-        logger.debug("Not implemented", LOG_LEVEL_ERR)
+        logger.warn("Not implemented", LOG_LEVEL_ERR)
 
 class DateTime(Value):
     def __init__(self, xmlelement=None):

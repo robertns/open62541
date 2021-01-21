@@ -362,6 +362,8 @@ class NodeSet(object):
             if not isinstance(dataTypeNode, DataTypeNode):
                 logger.error("Node id " + str(dataType) + " is not reference a valid dataType.")
                 return None
+
+            
             return dataTypeNode
         return None
 

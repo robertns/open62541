@@ -82,6 +82,7 @@ def generateNodeIdCode(value):
     if not value:
         return "UA_NODEID_NUMERIC(0, 0)"
     if value.i != None:
+        logger.warn("generateNodeIdCode: UA_NODEID_NUMERIC(ns[%s], %sLU)" % (value.ns, value.i))
         return "UA_NODEID_NUMERIC(ns[%s], %sLU)" % (value.ns, value.i)
     elif value.s != None:
         v = makeCLiteral(value.s)
@@ -105,6 +106,10 @@ def lowerFirstChar(inputString):
     return inputString[0].lower() + inputString[1:]
 
 def generateNodeValueCode(prepend , node, instanceName, valueName, global_var_code, asIndirect=False):
+
+    logger.warn("generateNodeValueCode(): instanceName = " + instanceName )
+    logger.warn("generateNodeValueCode(): node = " + str(node) + "type(node) == " + str(type(node)))
+
     if type(node) in [Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, Float, Double]:
         return prepend + " = (UA_" + node.__class__.__name__ + ") " + str(node.value) + ";"
     elif isinstance(node, String):
@@ -120,6 +125,7 @@ def generateNodeValueCode(prepend , node, instanceName, valueName, global_var_co
     elif isinstance(node, LocalizedText):
         return prepend + " = " + generateLocalizedTextCode(node, alloc=asIndirect) + ";"
     elif isinstance(node, NodeId):
+        logger.warn("generateNodeValueCode(): Instance NodeId")
         return prepend + " = " + generateNodeIdCode(node) + ";"
     elif isinstance(node, ExpandedNodeId):
         return prepend + " = " + generateExpandedNodeIdCode(node) + ";"
@@ -134,10 +140,15 @@ def generateNodeValueCode(prepend , node, instanceName, valueName, global_var_co
     elif isinstance(node, Guid):
         raise Exception("generateNodeValueCode for type " + node.__class__.name + " not implemented")
     elif isinstance(node, ExtensionObject):
+
+        logger.warn("generateNodeValueCode() ExtensionObject")
+
         if asIndirect == False:
             return prepend + " = *" + str(instanceName) + ";"
         return prepend + " = " + str(instanceName) + ";"
     elif isinstance(node, Structure):
+        logger.warn("generateNodeValueCode() Structure")
+
         code = []
         for subv in node.value:
             code.append(generateNodeValueCode(prepend + "." + lowerFirstChar(subv.alias), subv, instanceName, valueName, global_var_code, asIndirect))

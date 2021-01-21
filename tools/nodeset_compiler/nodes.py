@@ -466,22 +466,22 @@ class DataTypeNode(Node):
 
         if self.__encodable__ is not None and self.__encodable__:
             if self.isEncodable():
-                logger.debug(prefix + str(self.__baseTypeEncoding__) + " (already analyzed)")
+                logger.warn(prefix + str(self.__baseTypeEncoding__) + " (already analyzed)")
             else:
-                logger.debug( prefix + str(self.__baseTypeEncoding__) + "(already analyzed, not encodable!)")
+                logger.warn( prefix + str(self.__baseTypeEncoding__) + "(already analyzed, not encodable!)")
             return self.__baseTypeEncoding__
 
         self.__encodable__ = True
 
         if indent==0:
-            logger.debug("Parsing DataType " + str(self.browseName) + " (" + str(self.id) + ")")
+            logger.warn("Parsing DataType " + str(self.browseName) + " (" + str(self.id) + ")")
 
         if valueIsInternalType(self.browseName.name):
             self.__baseTypeEncoding__ = [self.browseName.name]
             self.__encodable__ = True
-            logger.debug( prefix + str(self.browseName) + "*")
-            logger.debug("Encodable as: " + str(self.__baseTypeEncoding__))
-            logger.debug("")
+            logger.warn( prefix + str(self.browseName) + "*")
+            logger.warn("Encodable as: " + str(self.__baseTypeEncoding__))
+            logger.warn("")
             return self.__baseTypeEncoding__
 
 
@@ -499,7 +499,7 @@ class DataTypeNode(Node):
 
         if self.__xmlDefinition__ is None:
             if parentType is not None:
-                logger.debug( prefix + "Attempting definition using supertype " + str(targetNode.browseName) + " for DataType " + " " + str(self.browseName))
+                logger.warn( prefix + "Attempting definition using supertype " + str(targetNode.browseName) + " for DataType " + " " + str(self.browseName))
                 subenc = targetNode.buildEncoding(nodeset=nodeset, indent=indent+1,
                                                   namespaceMapping=namespaceMapping)
                 if not targetNode.isEncodable():
@@ -507,15 +507,15 @@ class DataTypeNode(Node):
                 else:
                     self.__baseTypeEncoding__ = self.__baseTypeEncoding__ + [self.browseName.name, subenc, None]
             if len(self.__baseTypeEncoding__) == 0:
-                logger.debug(prefix + "No viable definition for " + str(self.browseName) + " " + str(self.id) + " found.")
+                logger.warn(prefix + "No viable definition for " + str(self.browseName) + " " + str(self.id) + " found.")
                 self.__encodable__ = False
 
             if indent==0:
                 if not self.__encodable__:
-                    logger.debug("Not encodable (partial): " + str(self.__baseTypeEncoding__))
+                    logger.warn("Not encodable (partial): " + str(self.__baseTypeEncoding__))
                 else:
-                    logger.debug("Encodable as: " + str(self.__baseTypeEncoding__))
-                logger.debug( "")
+                    logger.warn("Encodable as: " + str(self.__baseTypeEncoding__))
+                logger.warn( "")
 
             return self.__baseTypeEncoding__
 
@@ -577,7 +577,7 @@ class DataTypeNode(Node):
                     # but must still ensure that the dtnode is itself validly encodable
                     typeDict.append([fname, dtnode])
                     fdtype = str(dtnode.browseName.name)
-                    logger.debug( prefix + fname + " : " + fdtype + " -> " + str(dtnode.id))
+                    logger.warn( prefix + fname + " : " + fdtype + " -> " + str(dtnode.id))
                     subenc = dtnode.buildEncoding(nodeset=nodeset, indent=indent+1,
                                                   namespaceMapping=namespaceMapping)
                     self.__baseTypeEncoding__ = self.__baseTypeEncoding__ + [[fname, subenc, valueRank]]
@@ -608,16 +608,16 @@ class DataTypeNode(Node):
             self.__baseTypeEncoding__ = self.__baseTypeEncoding__ + ['Int32']
             self.__definition__ = enumDict
             self.__isEnum__ = True
-            logger.debug( prefix+"Int32* -> enumeration with dictionary " + str(enumDict) + " encodable " + str(self.__encodable__))
+            logger.warn( prefix+"Int32* -> enumeration with dictionary " + str(enumDict) + " encodable " + str(self.__encodable__))
             return self.__baseTypeEncoding__
 
         if indent==0:
             if not self.__encodable__:
-                logger.debug( "Not encodable (partial): " + str(self.__baseTypeEncoding__))
+                logger.warn( "Not encodable (partial): " + str(self.__baseTypeEncoding__))
             else:
-                logger.debug( "Encodable as: " + str(self.__baseTypeEncoding__))
+                logger.warn( "Encodable as: " + str(self.__baseTypeEncoding__))
                 self.__isEnum__ = False
-            logger.debug( "")
+            logger.warn( "")
         self.__definition__ = typeDict
         return self.__baseTypeEncoding__
 

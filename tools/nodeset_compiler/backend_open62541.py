@@ -214,9 +214,9 @@ _UA_END_DECLS
 """ % (outfilebase))
 
     # Loop over the sorted nodes
-    logger.info("Reordering nodes for minimal dependencies during printing")
+    logger.warn("Reordering nodes for minimal dependencies during printing")
     sorted_nodes = sortNodes(nodeset)
-    logger.info("Writing code for nodes and references")
+    logger.warn("Writing code for nodes and references")
     functionNumber = 0
 
     printed_ids = set()

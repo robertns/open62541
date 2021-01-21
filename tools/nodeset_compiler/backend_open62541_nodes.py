@@ -157,6 +157,8 @@ def generateCommonVariableCode(node, nodeset):
     codeCleanup = []
     codeGlobal = []
 
+    logger.warn("generateCommonVariableCode(): begin" )
+
     if node.valueRank is None:
         # Set the constrained value rank from the type/parent node
         setNodeValueRankRecursive(node, nodeset)
@@ -180,7 +182,10 @@ def generateCommonVariableCode(node, nodeset):
         # "Instances inherit the initial values for the Attributes that they have in common with the
         # TypeDefinitionNode from which they are instantiated, with the exceptions of the NodeClass and
         # NodeId."
+        logger.warn("generateCommonVariableCode(): setNodeDatatypeRecursive: " )
+        logger.warn("node.dataType before = " + str(node.dataType))
         setNodeDatatypeRecursive(node, nodeset)
+        logger.warn("node.dataType after = " + str(node.dataType))
         code.append("/* DataType inherited */")
 
     dataTypeNode = nodeset.getBaseDataType(nodeset.getDataTypeNode(node.dataType))
@@ -192,6 +197,7 @@ def generateCommonVariableCode(node, nodeset):
 
     if dataTypeNode.isEncodable():
         if node.value is not None:
+            logger.warn("generateCommonVariableCode(): isEncodable: generateValueCode()" )
             [code1, codeCleanup1, codeGlobal1] = generateValueCode(node.value, nodeset.nodes[node.id], nodeset)
             code += code1
             codeCleanup += codeCleanup1
@@ -253,13 +259,22 @@ def lowerFirstChar(inputString):
     return inputString[0].lower() + inputString[1:]
 
 def generateExtensionObjectSubtypeCode(node, parent, nodeset, global_var_code, instanceName=None, isArrayElement=False):
+
+    logger.warn("generateExtensionObjectSubtypeCode() begin() -------------------")
+    # logger.warn("node.to_string = " + node.to_string())
+
     code = [""]
     codeCleanup = [""]
 
-    logger.debug("Building extensionObject for " + str(parent.id))
-    logger.debug("Encoding " + str(node.encodingRule))
+    logger.warn("Building extensionObject for " + str(parent.id))
+    logger.warn("Encoding " + str(node.encodingRule))
+    logger.warn("node " + str(node))
+    logger.warn("Encoding dataType = " + str(node.dataType))
+
+
 
     parentDataType = nodeset.getDataTypeNode(parent.dataType)
+
     parentDataTypeName = nodeset.getDataTypeNode(parent.dataType).browseName.name
     if parentDataType.symbolicName is not None and parentDataType.symbolicName.value is not None:
         parentDataTypeName = parentDataType.symbolicName.value
@@ -288,6 +303,8 @@ def generateExtensionObjectSubtypeCode(node, parent, nodeset, global_var_code, i
     if values == None:
         values = []
     for idx,subv in enumerate(values):
+
+        logger.warn("for loop: idx = " + str(idx) + " subv = " + str(subv))
         encField = node.encodingRule[idx]
         memberName = lowerFirstChar(encField[0])
 
@@ -297,7 +314,7 @@ def generateExtensionObjectSubtypeCode(node, parent, nodeset, global_var_code, i
         if isinstance(subv, list):
             if len(subv) == 0:
                 continue
-            logger.info("ExtensionObject contains array")
+            logger.warn("ExtensionObject contains array")
             memberName = lowerFirstChar(encField[0])
             encTypeString = "UA_" + subv[0].__class__.__name__
             instanceNameSafe = makeCIdentifier(instanceName)
@@ -314,14 +331,21 @@ def generateExtensionObjectSubtypeCode(node, parent, nodeset, global_var_code, i
             code.append(instanceName + accessor + memberName + " = " + instanceNameSafe+"_"+ memberName+";")
             continue
 
-        logger.debug("Encoding of field " + memberName + " is " + str(subv.encodingRule) + "defined by " + str(encField))
+        logger.warn("Encoding of field " + memberName + " is " + str(subv.encodingRule) + "defined by " + str(encField))
         if subv.valueRank is None or subv.valueRank == 0:
             if not subv.isNone():
+                logger.warn("encoding of field optional")
                 # Some values can be optional
                 valueName = instanceName + accessor + memberName
+
+                logger.warn("encoding of field optional: valueName = " + valueName)
+                logger.warn("generateExtensionObjectSubtypeCode() subv " + str(subv))
+
                 code.append(generateNodeValueCode(valueName,
                             subv, instanceName,valueName, global_var_code, asIndirect=False))
         else:
+            logger.warn("encoding of field: else case -> call generateNodeValueCode")
+
             memberName = lowerFirstChar(encField[0])
             code.append(generateNodeValueCode(instanceName + accessor + memberName + "Size", subv,
                                               instanceName,valueName, global_var_code, asIndirect=False))
@@ -361,6 +385,9 @@ def generateValueCode(node, parentNode, nodeset, bootstrapping=True):
     codeGlobal = []
     valueName = generateNodeIdPrintable(parentNode) + "_variant_DataContents"
 
+    logger.warn("FEM generateValueCode() " + valueName)
+
+
     # node.value either contains a list of multiple identical BUILTINTYPES, or it
     # contains a single builtintype (which may be a container); choose if we need
     # to create an array or a single variable.
@@ -379,7 +406,15 @@ def generateValueCode(node, parentNode, nodeset, bootstrapping=True):
 
     dataTypeNode = nodeset.getDataTypeNode(parentNode.dataType)
 
+    logger.warn("generateValueCode(): getDataTypeNode = " + str(parentNode.dataType))
+    logger.warn("generateValueCode(): dataTypeNode = " + str(dataTypeNode.id))
+
+    logger.warn("getTypeBrowseName(dataTypeNode) = " + getTypeBrowseName(dataTypeNode))
+    
     if isArrayVariableNode(node, parentNode):
+        
+        logger.warn("FEM: generateValueCode(): isArrayVariableNode")
+
         # User the following strategy for all directly mappable values a la 'UA_Type MyInt = (UA_Type) 23;'
         if isinstance(node.value[0], Guid):
             logger.warn("Don't know how to print array of GUID in node " + str(parentNode.id))
@@ -389,9 +424,12 @@ def generateValueCode(node, parentNode, nodeset, bootstrapping=True):
             logger.warn("Don't know how to print array of StatusCode in node " + str(parentNode.id))
         else:
             if isinstance(node.value[0], ExtensionObject):
+                logger.warn("FEM: generateValueCode(): isinstance ExtObj")
+
                 code.append("UA_" + getTypeBrowseName(dataTypeNode) + " " + valueName + "[" + str(len(node.value)) + "];")
                 for idx, v in enumerate(node.value):
-                    logger.debug("Building extObj array index " + str(idx))
+                    logger.warn("Building extObj array index " + str(idx) + "  --  FEM: Error seems to be here: v is wrong")
+
                     instanceName = valueName + "[" + str(idx) + "]"
                     [code1, codeCleanup1] = generateExtensionObjectSubtypeCode(v, parent=parentNode, nodeset=nodeset,
                                                                                global_var_code=codeGlobal, instanceName=instanceName,
@@ -409,6 +447,10 @@ def generateValueCode(node, parentNode, nodeset, bootstrapping=True):
                         dataTypeNode.typesArray + "["+dataTypeNode.typesArray + "_" + getTypeBrowseName(dataTypeNode).upper() +"]);")
     #scalar value
     else:
+
+        logger.warn("FEM: generateValueCode(): scalar value")
+
+
         # User the following strategy for all directly mappable values a la 'UA_Type MyInt = (UA_Type) 23;'
         if isinstance(node.value[0], Guid):
             logger.warn("Don't know how to print scalar GUID in node " + str(parentNode.id))
