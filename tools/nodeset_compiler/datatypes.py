@@ -170,6 +170,7 @@ class Value(object):
 
         # Encoding may be partially handed down (iterative call). Only resort to
         # type definition if we are not given a specific encoding to match
+        logger.warn("enter __parseXMLSingleValue")
         if encodingPart is None:
             enc = parentDataTypeNode.getEncoding()
         else:
@@ -226,6 +227,8 @@ class Value(object):
             elif alias is not None and len(enc[1]) > 1:
                 alias = enc[0]
             # otherwise drop the alias
+            logger.warn("__parseXMLSingleValue: value = " + str(self.__parseXMLSingleValue(xmlvalue, parentDataTypeNode, parent,
+                                              alias=alias, encodingPart=enc[1], valueRank=enc[2] if len(enc)>2 else None)))
             return self.__parseXMLSingleValue(xmlvalue, parentDataTypeNode, parent,
                                               alias=alias, encodingPart=enc[1], valueRank=enc[2] if len(enc)>2 else None)
         elif not xmlvalue.localName == "ExtensionObject":
@@ -311,6 +314,7 @@ class Value(object):
             except Exception as ex:
                 logger.error(str(parent.id) + ": Could not parse <Body> for ExtensionObject. {}".format(ex))
 
+            logger.warn("__parseXMLSingleValue: extobj = " + str(extobj.value))
             return extobj
 
     def __str__(self):

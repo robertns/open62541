@@ -222,6 +222,7 @@ def generateCommonVariableCode(node, nodeset):
         code.append("/* Cannot encode the value */")
         logger.warn("Cannot encode dataTypeNode: " + dataTypeNode.browseName.name + " for value of node " + node.browseName.name + " " + str(node.id))
 
+    logger.warn("generateCommonVariableCode(): end" )
     return [code, codeCleanup, codeGlobal]
 
 def generateVariableNodeCode(node, nodeset):
